@@ -17,7 +17,14 @@ public class packetHeader {
     private int capLen; //4B，当前数据包的数据区长度，抓取到的数据帧的长度
     private int len; //4B，离线数据长度，网络中实际数据帧的长度，基本和capLen长度相等
 
+    public packetHeader(){}
 
+    public packetHeader(int timeHighStamp,int timeLowStamp,int capLen,int len){
+        this.timeHighStamp = timeHighStamp;
+        this.timeLowStamp = timeLowStamp;
+        this.capLen = capLen;
+        this.len = len;
+    }
 
     public int getTimeHighStamp() {
         return timeHighStamp;

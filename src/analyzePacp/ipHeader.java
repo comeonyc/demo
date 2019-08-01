@@ -19,7 +19,14 @@ public class ipHeader {
 
 
     /**
-     *  间隔8B，其中包括1B服务类型，2B总长度，2B标识，2B标志加偏移，1B生存时间
+     * 间隔1B服务类型
+     */
+
+    private int totalLen; //2B,总长度
+
+
+    /**
+     *  间隔5B，2B标识，2B标志加偏移，1B生存时间
      */
 
     private short protocol; // 1B,传输层协议
@@ -72,6 +79,15 @@ public class ipHeader {
 
     public void setDstIP(String dstIP) {
         this.dstIP = dstIP;
+    }
+
+
+    public int getTotalLen() {
+        return totalLen;
+    }
+
+    public void setTotalLen(int totalLen) {
+        this.totalLen = totalLen;
     }
 
 }

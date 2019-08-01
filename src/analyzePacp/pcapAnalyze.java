@@ -423,20 +423,34 @@ public class pcapAnalyze {
          */
 
         packetFile packetFile_flag = packetFiles.get(start);
-        long flag = packetFile_flag.getPacketHeader().getHighTime();
+        long flag_high = packetFile_flag.getPacketHeader().getHighTime();
+        long flag_low = packetFile_flag.getPacketHeader().getLowTime();
         int i = start;
         int j = end;
 
         while(i < j){
-            while((i<j) && (packetFiles.get(j).getPacketHeader().getHighTime() >= flag)){
-                j--;
+            while((i<j) && (packetFiles.get(j).getPacketHeader().getHighTime() >= flag_high )){
+                if(packetFiles.get(j).getPacketHeader().getHighTime()==flag_high && packetFiles.get(j).getPacketHeader().getLowTime() >= flag_low){
+                    j--;
+                }else if(packetFiles.get(j).getPacketHeader().getHighTime()==flag_high && packetFiles.get(j).getPacketHeader().getLowTime() < flag_low){
+                    break;
+                }else {
+                    j--;
+                }
+
             }
 
             packetFiles.set(i,packetFiles.get(j));
             //packetFiles[i] = packetFiles[j];
 
-            while((i<j) && (packetFiles.get(i).getPacketHeader().getHighTime() <= flag)){
-                i++;
+            while((i<j) && (packetFiles.get(i).getPacketHeader().getHighTime() <= flag_high)){
+                if(packetFiles.get(i).getPacketHeader().getHighTime() == flag_high  && packetFiles.get(i).getPacketHeader().getLowTime() <= flag_low){
+                    i++;
+                }else if (packetFiles.get(i).getPacketHeader().getHighTime() == flag_high  && packetFiles.get(i).getPacketHeader().getLowTime() > flag_low){
+                    break;
+                }else {
+                    i++;
+                }
             }
 
             packetFiles.set(j,packetFiles.get(i));
