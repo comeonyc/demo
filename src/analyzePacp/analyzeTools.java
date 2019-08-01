@@ -2,10 +2,9 @@ package analyzePacp;
 
 import org.junit.Test;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @author ：YangChen
@@ -18,6 +17,7 @@ public class analyzeTools {
 
     private byte[] pcapHeaderBuffer;
     private ArrayList<packetFile> packetFiles;
+    private HashMap<String,Integer> streamInfoMap;
 
     private int errorPacketNum = 0;
 
@@ -221,7 +221,7 @@ public class analyzeTools {
             fis.close();
 
             System.out.println(packetFiles.size());
-            System.out.println(errorPacketNum);
+            System.out.println("畸形的包共有："+errorPacketNum);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -278,22 +278,69 @@ public class analyzeTools {
 
     }
 
+
     public void writePcap(){
+        FileOutputStream fos = null;
+        BufferedOutputStream bos;
+        int fileLable = 0;
+        String fileName="";
+
+        streamInfoMap = new HashMap<>();
+        try{
+            for(int i=0 ;i<packetFiles.size();i++) {
+                String IP_1 = packetFiles.get(i).getIpHeader().getSrcIP();
+                String IP_2 = packetFiles.get(i).getIpHeader().getDstIP();
+                int port_1 = packetFiles.get(i).getTcpHeader().getSrcPort();
+                int port_2 = packetFiles.get(i).getTcpHeader().getDstPort();
+
+                String info_1 = IP_1 + "/" + IP_2 + "/" + port_1 + "/" + port_2; //info_1是正常的四元组信息
+                String info_2 = IP_2 + "/" + IP_1 + "/" + port_2 + "/" + port_1;
+
+                //判别是否在map里面
+                if (!streamInfoMap.containsKey(info_1)) {
+                    //如果不在的话，往map里面写
+                    streamInfoMap.put(info_1, fileLable);
+                    streamInfoMap.put(info_2, fileLable);
+
+                    fileName = "sort/"+fileLable + ".pcap";
+                    fos = new FileOutputStream(fileName,false);
+                    bos = new BufferedOutputStream(fos);
+
+                    bos.write(pcapHeaderBuffer);
+                    bos.write(packetFiles.get(i).getPacketHeader().getPacketHeaderInfo());
+                    bos.write(packetFiles.get(i).getData());
+
+                    fileLable++;
+
+                }else {
+                    fileName = "sort/"+streamInfoMap.get(info_1) + ".pcap";
+                    fos = new FileOutputStream(fileName,true);
+                    bos = new BufferedOutputStream(fos);
+                    bos.write(packetFiles.get(i).getPacketHeader().getPacketHeaderInfo());
+                    bos.write(packetFiles.get(i).getData());
+                }
+
+                bos.close();
+                fos.close();
+
+            }
+
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("共有流："+streamInfoMap.size());
 
     }
 
-//    public void insetSort(packetFile packetFile){
-//
-//        long high_time = DataTools.getTime(packetFile.getPacketHeader().getTimeHighStamp());
-//        long low_time = DataTools.getTime(packetFile.getPacketHeader().getTimeLowStamp());
-//
-//        // packetFiles.
-//
-//    }
-
     @Test
-    public void test(){
+    public void test() throws IOException {
         String name = "1.pcap";
         readPcapFile(name);
+        quickSort(0,packetFiles.size()-1);
+        writePcap();
+
     }
 }

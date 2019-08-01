@@ -89,6 +89,38 @@ public class packetHeader {
         return bytes;
     }
 
+    public byte[] getPacketHeaderInfo(){
+        byte[] bytes = new byte[16];
+        byte[] byte_4 = new byte[4];
+
+        byte_4 = DataTools.intToByte(getTimeHighStamp());
+        bytes[0] = byte_4[3];
+        bytes[1] = byte_4[2];
+        bytes[2] = byte_4[1];
+        bytes[3] = byte_4[0];
+
+        byte_4 = DataTools.intToByte(getTimeLowStamp());
+        bytes[4] = byte_4[3];
+        bytes[5] = byte_4[2];
+        bytes[6] = byte_4[1];
+        bytes[7] = byte_4[0];
+
+        byte_4 = DataTools.intToByte(getCapLen());
+        bytes[8] = byte_4[3];
+        bytes[9] = byte_4[2];
+        bytes[10] = byte_4[1];
+        bytes[11] = byte_4[0];
+
+        byte_4 = DataTools.intToByte(getLen());
+        bytes[12] = byte_4[3];
+        bytes[13] = byte_4[2];
+        bytes[14] = byte_4[1];
+        bytes[15] = byte_4[0];
+
+        return bytes;
+    }
+
+
     public long getLowTime(){
         byte[] byte_4 = new byte[4];
         byte_4 = DataUtils.IntToByte(getTimeLowStamp());
