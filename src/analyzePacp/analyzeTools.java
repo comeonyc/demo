@@ -1,5 +1,4 @@
 package analyzePacp;
-
 import org.junit.Test;
 
 import java.io.*;
@@ -278,7 +277,6 @@ public class analyzeTools {
 
     }
 
-
     public void writePcap(){
         FileOutputStream fos = null;
         BufferedOutputStream bos;
@@ -331,13 +329,13 @@ public class analyzeTools {
             e.printStackTrace();
         }
 
-        System.out.println("共有流："+streamInfoMap.size());
+        System.out.println("共有流："+streamInfoMap.size()/2);
 
     }
 
     @Test
-    public void test() throws IOException {
-        String name = "1.pcap";
+    public void test(String name) throws IOException {
+        //String name = "1.pcap";
         readPcapFile(name);
         quickSort(0,packetFiles.size()-1);
         writePcap();
