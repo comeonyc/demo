@@ -76,28 +76,5 @@ public class pcapHeader {
         this.linkType = linkType;
     }
 
-    @Override
-    public String toString() {
-        return "PcapFileHeader [magic=" + getMagic()
-                + ", magorVersion=" + getMagic()
-                + ", minorVersion=" + getMinor()
-                + ", timezone=" + getTimeZone()
-                + ", sigflags=" +  getSigFigs()
-                + ", snaplen=" +  getSnapLen()
-                + ", linktype=" +  getLinkType()
-                + "]";
 
-    }
-
-    public String getString() {
-        String res = Integer.toString(getMagic()) +
-                Integer.toString(getMajor()) +
-                Integer.toString(getMinor()) +
-                Integer.toString(getTimeZone()) +
-                Integer.toString(getSigFigs()) +
-                Integer.toString(getSnapLen()) +
-                Integer.toString(getLinkType());
-
-        return  res;
-    }
 }

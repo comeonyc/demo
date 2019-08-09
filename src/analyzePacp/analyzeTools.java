@@ -1,8 +1,9 @@
 package analyzePacp;
+import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 import org.junit.Test;
-
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -16,7 +17,8 @@ public class analyzeTools {
 
     private byte[] pcapHeaderBuffer;
     private ArrayList<packetFile> packetFiles;
-    private HashMap<String,Integer> streamInfoMap;
+    private HashMap<String,Long> streamInfoMap;
+    private long fileLable = 0;
 
     private int errorPacketNum = 0;
 
@@ -137,12 +139,12 @@ public class analyzeTools {
 
     }
 
-    public void readPcapFile(String fileName){
-        FileInputStream fis = null;
+    public void readPcapFile(FileInputStream fis,boolean normal){
+        //FileInputStream fis = null;
         packetFiles = new ArrayList<>();
 
         try {
-            fis = new FileInputStream(fileName);
+            //fis = new FileInputStream(fileName);
             int offset = 0;
             int packetLen;
             int packet_real_len;
@@ -174,12 +176,19 @@ public class analyzeTools {
                     offset += 8;  //udp头 8B
                     offset += 8;  //标识符 8B
                     byteBuffer = new byte[50];
-                    fis.read(byteBuffer,0,50);
+
                     //--------------第一个数据报的包头结束----------
+
+                    if(normal){
+                        packet_real_len = packetLen;
+                    }else {
+                        fis.read(byteBuffer,0,50);
+                        packet_real_len = packetLen - 50;
+
+                    }
 
 
                     //--------------第二个数据报的包头开始----------------
-                    packet_real_len = packetLen - 50;
 
                     byteBuffer = new byte[packet_real_len]; //存储所有数据
 
@@ -219,8 +228,8 @@ public class analyzeTools {
 
             fis.close();
 
-            System.out.println(packetFiles.size());
-            System.out.println("畸形的包共有："+errorPacketNum);
+//            System.out.println(packetFiles.size());
+//            System.out.println("畸形的包共有："+errorPacketNum);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -230,7 +239,72 @@ public class analyzeTools {
 
     }
 
+
+    public void readFolder(String folder) throws FileNotFoundException {
+        File file = new File(folder);
+        FileInputStream fis = null;
+
+
+        if(file.isDirectory()){
+            File[] files = file.listFiles();
+            int number = 0;
+
+            for(File fileTmp : files){
+                //System.out.println("--------------正在读取文件内容-----------------");
+                fis = new FileInputStream(fileTmp);
+                readPcapFile(fis,false);
+                number += packetFiles.size();
+                System.out.println(fileTmp.getName()+"/"+packetFiles.size()+"/"+number);
+                writePcap();
+            }
+        }
+    }
+
+    public void quick() throws FileNotFoundException {
+        File file = new File("sort");
+        FileInputStream fis = null;
+
+        if(file.isDirectory()){
+            File[] files = file.listFiles();
+            for(File fileTmp : files){
+
+                System.out.println(fileTmp.getName());
+
+                if(fileTmp.getName().contains(".pcap")){
+                    fis = new FileInputStream(fileTmp);
+
+                    readPcapFile(fis,true);
+                    quickSort(0,packetFiles.size()-1);
+                    rewritePcap(fileTmp);
+                }
+
+            }
+        }
+    }
+
+
+    public void rewritePcap(File file){
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+            bos.write(pcapHeaderBuffer);
+            for(int i=0;i<packetFiles.size();i++){
+                bos.write(packetFiles.get(i).getPacketHeader().getPacketHeaderInfo());
+                bos.write(packetFiles.get(i).getData());
+            }
+
+            bos.close();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public  void quickSort(int start,int end){
+
         packetFile packetFile_flag = packetFiles.get(start);
         long flag_high = DataTools.getTime(packetFile_flag.getPacketHeader().getTimeHighStamp());
         long flag_low = DataTools.getTime(packetFile_flag.getPacketHeader().getTimeLowStamp());
@@ -280,10 +354,9 @@ public class analyzeTools {
     public void writePcap(){
         FileOutputStream fos = null;
         BufferedOutputStream bos;
-        int fileLable = 0;
         String fileName="";
 
-        streamInfoMap = new HashMap<>();
+
         try{
             for(int i=0 ;i<packetFiles.size();i++) {
                 String IP_1 = packetFiles.get(i).getIpHeader().getSrcIP();
@@ -329,16 +402,36 @@ public class analyzeTools {
             e.printStackTrace();
         }
 
-        System.out.println("共有流："+streamInfoMap.size()/2);
+        //System.out.println("共有流："+streamInfoMap.size()/2);
 
+    }
+    public ArrayList<packetFile> getPacketFiles() {
+        return packetFiles;
+    }
+
+    public void setPacketFiles(ArrayList<packetFile> packetFiles) {
+        this.packetFiles = packetFiles;
+    }
+
+    public byte[] getPcapHeaderBuffer() {
+        return pcapHeaderBuffer;
+    }
+
+    public void setPcapHeaderBuffer(byte[] pcapHeaderBuffer) {
+        this.pcapHeaderBuffer = pcapHeaderBuffer;
     }
 
     @Test
-    public void test(String name) throws IOException {
-        //String name = "1.pcap";
-        readPcapFile(name);
-        quickSort(0,packetFiles.size()-1);
-        writePcap();
+    public void test() throws IOException {
+        String name = "1";
+
+        streamInfoMap = new HashMap<>();
+        readFolder(name);
+
+        System.out.println(streamInfoMap.size());
+
+
+
 
     }
 }

@@ -10,5 +10,6 @@
     <orderEntry type="library" name="org.apache.hadoop:hadoop-common:2.7.3" level="project" />
     <orderEntry type="library" name="org.apache.hadoop:hadoop-hdfs:2.7.3" level="project" />
     <orderEntry type="library" name="junit:junit:4.8.1" level="project" />
+    <orderEntry type="library" name="com.alibaba:fastjson:1.2.16" level="project" />
   </component>
 </module>

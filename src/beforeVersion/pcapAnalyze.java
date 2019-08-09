@@ -1,12 +1,9 @@
-package analyzePacp;
-import org.apache.hadoop.hdfs.net.TcpPeerServer;
+package beforeVersion;
+import analyzePacp.*;
 import org.junit.Test;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -30,7 +27,7 @@ import java.util.List;
 public class pcapAnalyze {
 
 
-    private pcapHeader pcapHeader;
+    private analyzePacp.pcapHeader pcapHeader;
     private byte[] byteBuffer;
     private int offset = 0;
 
